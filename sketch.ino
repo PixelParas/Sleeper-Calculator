@@ -1,11 +1,64 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <map>
+#include <string>
+#include <array>
 
 #define SCREEN_WIDTH 124
 #define SCREEN_HEIGHT 64
 #define OLED_RESET    -1  // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C
+
+//Full Size font 5x9
+std::map<std::string, std::array<std::array<int, 5>, 9>> fullSizeFont = {
+    {"1", {{
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 1, 1, 0, 0}}, 
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 0, 1, 0, 0}}, 
+        {{0, 1, 1, 1, 0}}
+    }}},
+    {"2", {{
+        {{0, 1, 1, 1, 0}}, 
+        {{1, 0, 0, 0, 1}}, 
+        {{0, 0, 0, 0, 1}}, 
+        {{0, 0, 0, 0, 1}}, 
+        {{0, 0, 1, 1, 0}}, 
+        {{0, 0, 0, 0, 1}}, 
+        {{1, 0, 0, 0, 1}}, 
+        {{1, 0, 0, 0, 1}}, 
+        {{0, 1, 1, 1, 0}}
+    }}},
+    {"3", {{
+        {{0, 1, 1, 1, 0}}, 
+        {{1, 0, 0, 0, 1}}, 
+        {{1, 0, 0, 0, 1}}, 
+        {{0, 0, 0, 0, 1}}, 
+        {{0, 0, 1, 1, 0}}, 
+        {{0, 0, 0, 0, 1}}, 
+        {{1, 0, 0, 0, 1}}, 
+        {{1, 0, 0, 0 ,1}}, 
+        {{0 ,1 ,1 ,1 ,0}}
+    }}},
+    {"4", {{
+        {{0 ,0 ,0 ,1 ,0}},
+        {{0 ,0 ,1 ,1 ,0}},
+        {{0 ,0 ,1 ,1 ,0}},
+        {{0 ,1 ,0 ,1 ,0}},
+        {{0 ,1 ,0 ,1 ,0}},
+        {{1 ,0 ,0 ,1 ,0}},
+        {{1 ,1 ,1 ,1 ,1}},
+        {{0 ,0 ,0 ,1 ,0}},
+        {{0 ,0 ,0 ,1 ,0}}
+    }}},
+    };
+
+
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -18,6 +71,25 @@ void setPixel(int x, int y) {
   int page = y / 8;
   int index = x + page * SCREEN_WIDTH;
   screenBuffer[index] |= (1 << (y % 8));
+}
+
+std::string text = "1234"; // Example text
+void setText(){
+    for(int i = 0; i < text.length(); i++) {
+        std::string character = std::string(1, text[i]);
+        if (fullSizeFont.find(character) != fullSizeFont.end()) {
+            auto& charData = fullSizeFont[character];
+            for (int y = 0; y < 9; y++) {
+                for (int x = 0; x < 5; x++) {
+                    if (charData[y][x] == 1) {
+                        setPixel((i*6)+ x, y); // Adjust position for spacing
+                    }
+                }
+            }
+        }else{
+            // Chracter not found in font map, handle accordingly
+        }
+    }
 }
 
 // Function to clear a pixel
